@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../pandas_dev"
 		}
 	],
 	"settings": {}
