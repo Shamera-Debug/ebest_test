@@ -1,9 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "bigdata-project",
 			"path": "."
 		},
 		{
+			"name": "pandas_dev",
 			"path": "../pandas_dev"
 		}
 	],
