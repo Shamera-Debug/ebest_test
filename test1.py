@@ -12,7 +12,7 @@ import schedule # pip
 import warnings
 warnings.filterwarnings('ignore')
 
-# 2
+# 2213213123123
 # ------- 본인 토큰으로 수정 필요 -------
 APP_KEY = "PSNeOvV92SiRB7a1bbXLYBJt8nuQNicHhLNQ"
 APP_SECRET = "Qxud73tJ6NDVGoSXNQckFzJbv7oPI08Q"
