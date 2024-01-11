@@ -6,7 +6,6 @@ import numpy as np
 import requests
 import os
 import time
-import sys
 import oauth2 as oauth 
 import time
 import datetime
@@ -72,7 +71,7 @@ class t1101:
 
         _body           ={
             "t1101InBlock" : {
-                "shcode" : shcode,  # 종목 코드
+                "shcode" : shcode,
             }
         }
 
@@ -102,8 +101,6 @@ def request_tr(url, header, body, tr_name, out_block_tag, shcode,ACCESS_TOKEN):
     header["authorization"] = f"Bearer {ACCESS_TOKEN}"
     _res = requests.post(url, headers=header, data=json.dumps(body), timeout=3.2)   #지정된 시간내에 응답이 오지 않으면 예외가 발생하므로 try/except 구문설정하기
     _json_data = _res.json()
-    # print(_json_data)                                                          # Ok
-    # print(f"{tr_name}{out_block_tag}1")                                        # Ok
     _data_frame = pd.json_normalize(_json_data[f"{tr_name}{out_block_tag}"])    #json양식을 데이터 프레임으로 바꾸기
 
     return _data_frame, tr_name, shcode
@@ -125,11 +122,11 @@ def save_csv(data_frame, tr_name, shcode=""):
     _seoul_timezone = pytz.timezone('Asia/Seoul')
     _time_stamp = datetime.datetime.now(_seoul_timezone).strftime("%Y%m%d")
     
-    
+    # 경로 수정 필요
     if len(shcode) > 0:
         _path = f'D:\csv\{_time_stamp}_{shcode}.csv'
     else:
-        _path = f'D:\csv\{tr_name.upper()}_{_time_stamp}.csv'
+        _path = f'D:\csv\{_time_stamp}_{shcode}.csv'
             
     global count 
     count += 1       
@@ -150,8 +147,8 @@ def mainFunc(code):
         results, tr_name, shcode = request_tr(*t1101.t1101(shcode=code, period=365, acc_tk=acc_tk_main), ACCESS_TOKEN=acc_tk_main)
         save_csv(results, tr_name, shcode)
         current_time = datetime.datetime.now().time()
-        if current_time.hour == 15 and current_time.minute == 30:
-            print("현재 시간이 15:30이므로 프로그램을 종료합니다.")
+        if current_time.hour == 15 and current_time.minute == 31:
+            print("현재 시간이 15:31이므로 프로그램을 종료합니다.")
             break
         time.sleep(0.34)
 
@@ -165,8 +162,9 @@ def run_at_specific_time(dd):
 
 
 if __name__ == '__main__':
-    run_at_specific_time('0900')
+    run_at_specific_time('0859')
     procs = []
+    # 종목 코드 3개 수정 필요
     for i in ['069500',"005380",'006400']:
         p = multiprocessing.Process(target=mainFunc, args=(i, ))
         p.start()
