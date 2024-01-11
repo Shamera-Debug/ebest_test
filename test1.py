@@ -5,10 +5,12 @@ import pandas as pd
 import numpy as np
 import requests
 import os
+import time
 import sys
-import oauth2 as oauth # pip
-from datetime import datetime
-import schedule # pip
+import oauth2 as oauth 
+import time
+import datetime
+import multiprocessing
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -121,49 +123,55 @@ def save_csv(data_frame, tr_name, shcode=""):
     """
 
     _seoul_timezone = pytz.timezone('Asia/Seoul')
-    _time_stamp = datetime.now(_seoul_timezone).strftime("%Y%m%d")
+    _time_stamp = datetime.datetime.now(_seoul_timezone).strftime("%Y%m%d")
     
     
     if len(shcode) > 0:
-        _path = f'C:\ebest_ml_dev\ebest\csv\{tr_name.upper()}_{shcode}_{_time_stamp}.csv'
+        _path = f'D:\csv\{_time_stamp}_{shcode}.csv'
     else:
-        _path = f'C:\ebest_ml_dev\ebest\csv\{tr_name.upper()}_{_time_stamp}.csv'
+        _path = f'D:\csv\{tr_name.upper()}_{_time_stamp}.csv'
             
-            
+    global count 
+    count += 1       
     if os.path.exists(_path):
         # If the file already exists, append the data
         data_frame.to_csv(_path, mode='a', header=False, index=False)
-        print("파일에 데이터를 추가했습니다. :", _path)
+        print(f'{shcode} : {count}')
     else:
         # If the file does not exist, create a new file
         data_frame.to_csv(_path, index=False)
-        print("새로운 파일을 생성하고 데이터를 저장했습니다. :", _path)
+        print(f"새로운 파일을 생성 {shcode} : {count}")
         
 
-def mainFunc(acc_tk_main=""):
-    if __name__ == "__main__":       
-        # ----- 종목 코드 -----
-        code = "005930"    
-        # --------------------
 
+def mainFunc(code):
+    acc_tk_main=access_token(APP_KEY,APP_SECRET)
+    while True:   
         results, tr_name, shcode = request_tr(*t1101.t1101(shcode=code, period=365, acc_tk=acc_tk_main), ACCESS_TOKEN=acc_tk_main)
         save_csv(results, tr_name, shcode)
-        
+        current_time = datetime.datetime.now().time()
+        if current_time.hour == 15 and current_time.minute == 30:
+            print("현재 시간이 15:30이므로 프로그램을 종료합니다.")
+            break
+        time.sleep(0.34)
 
-def exit():
-    print("종료")
-    sys.exit()
-
-def start():
-    acc_token=access_token(APP_KEY,APP_SECRET)
-    schedule.every(1.01).seconds.do(mainFunc, acc_token)
-    # ----- 종료 시간 -----
-    schedule.every().day.at("11:12").do(exit)
-
-# ----- 시작 시간 -----
-schedule.every().day.at("11:11").do(start)   
+def run_at_specific_time(dd):
+    current_time = datetime.datetime.now().strftime("%H%M")
+    target_time = dd
+    while current_time != target_time:
+        time.sleep(0.05)
+        current_time = datetime.datetime.now().strftime("%H%M")
 
 
-while True:   
-    schedule.run_pending()
+
+if __name__ == '__main__':
+    run_at_specific_time('0900')
+    procs = []
+    for i in ['069500',"005380",'006400']:
+        p = multiprocessing.Process(target=mainFunc, args=(i, ))
+        p.start()
+        procs.append(p)
+
+    for p in procs:
+        p.join()
     
